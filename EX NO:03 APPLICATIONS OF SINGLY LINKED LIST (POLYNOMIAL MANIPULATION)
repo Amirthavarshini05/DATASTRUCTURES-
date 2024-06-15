@@ -1,3 +1,6 @@
+Mam,
+Polynomial manipulation 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -6,9 +9,9 @@ struct Node {
     int coeff;
     int exp;
     struct Node * next;
-}* poly = NULL;
+}* poly1 = NULL,*poly2=NULL,*result=NULL;
 
-void create() {
+void create1() {
     struct Node * t, * last = NULL;
     int num, i;
 
@@ -20,8 +23,8 @@ void create() {
         t = (struct Node * ) malloc(sizeof(struct Node));
         scanf("%d%d", & t -> coeff, & t -> exp);
         t -> next = NULL;
-        if (poly == NULL) {
-            poly = last = t;
+        if (poly1 == NULL) {
+            poly1 = last = t;
         } else {
             last -> next = t;
             last = t;
@@ -29,36 +32,249 @@ void create() {
     }
 }
 
+void create2() {
+    struct Node * t, * last = NULL;
+    int num, i;
+
+    printf("Enter number of terms: ");
+    scanf("%d", & num);
+    printf("Enter each term with coeff and exp:\n");
+
+    for (i = 0; i < num; i++) {
+        t = (struct Node * ) malloc(sizeof(struct Node));
+        scanf("%d%d", & t -> coeff, & t -> exp);
+        t -> next = NULL;
+        if (poly2 == NULL) {
+            poly2 = last = t;
+        } else {
+            last -> next = t;
+            last = t;
+        }
+    }
+}
+
+
 void Display(struct Node * p) {
-    printf("%dx%d ", p -> coeff, p -> exp);
-        p = p -> next;
-       
+    printf("(%dx^%d) ", p -> coeff, p -> exp);
+    p = p -> next;
+
     while (p) {
-        printf("+ %dx%d ", p -> coeff, p -> exp);
+        printf("+ (%dx^%d)", p -> coeff, p -> exp);
         p = p -> next;
     }
     printf("\n");
 }
 
-long Eval(struct Node * p, int x) {
-    long val = 0;
+void normalize(){
+    struct Node *ptr=result;
+    while(ptr){
+        struct Node *temp=ptr;
+        while(temp->next){
+            struct Node*erase;
+            if(ptr->exp==temp->next->exp){
+                ptr->coeff=ptr->coeff+temp->next->coeff;
+                erase=temp->next;
+                temp->next=temp->next->next;
+                free(erase);
+            }
+            temp=temp->next;
+        }
+        ptr=ptr->next;
+    }
+}
+
+void add(struct Node * p1, struct Node * p2) {
+    struct Node * t, * last = NULL;
+    int num1,num2;
+    int p;
+    if(p1->exp>p2->exp)
+        p=p1->exp;
+    else
+        p=p2->exp;
 
     while (p) {
-        val += p -> coeff * pow(x, p -> exp);
-        p = p -> next;
+        p--;
+        if(p1!=NULL && p2!= NULL) {
+            t = (struct Node * ) malloc(sizeof(struct Node));
+            if(p1->exp==p2->exp) {
+                num1=p1->exp;
+                num2=p1->coeff+p2->coeff;
+                p1 = p1 -> next;
+                p2 = p2 -> next;
+            }
+            else if(p1->exp>p2->exp) {
+                num1=p1->exp;
+                num2=p1->coeff;
+                p1 = p1 -> next;
+            }
+            else if(p1->exp<p2->exp) {
+                num1=p2->exp;
+                num2=p2->coeff;
+                p2 = p2 -> next;
+            }
+            t->exp=num1;
+            t->coeff=num2;
+
+            t -> next = NULL;
+            if (result == NULL) {
+                result = last = t;
+            } else {
+                last -> next = t;
+                last = t;
+            }
+        }
+        if(p1!=NULL && p2==NULL) {
+            t = (struct Node * ) malloc(sizeof(struct Node));
+            num1=p1->exp;
+            num2=p1->coeff;
+            p1 = p1 -> next;
+            t->exp=num1;
+            t->coeff=num2;
+
+            t -> next = NULL;
+            if (result == NULL) {
+                result = last = t;
+            } else {
+                last -> next = t;
+                last = t;
+            }
+        }
+        if(p1==NULL && p2!=NULL) {
+            t = (struct Node * ) malloc(sizeof(struct Node));
+            num1=p2->exp;
+            num2=p2->coeff;
+            p2 = p2 -> next;
+            t->exp=num1;
+            t->coeff=num2;
+
+            t -> next = NULL;
+            if (result == NULL) {
+                result = last = t;
+            } else {
+                last -> next = t;
+                last = t;
+            }
+        }
     }
-   
-    return val;
+    normalize(result);
+    Display(result);
+    result=NULL;
+}
+
+void sub(struct Node * p1, struct Node * p2) {
+    struct Node * t, * last = NULL;
+    int num1,num2;
+    int p;
+    if(p1->exp>p2->exp)
+        p=p1->exp;
+    else
+        p=p2->exp;
+
+    while (p) {
+        p--;
+        if(p1!=NULL && p2!= NULL) {
+            t = (struct Node * ) malloc(sizeof(struct Node));
+            if(p1->exp==p2->exp) {
+                num1=p1->exp;
+                num2=p1->coeff-p2->coeff;
+                p1 = p1 -> next;
+                p2 = p2 -> next;
+            }
+            else if(p1->exp>p2->exp) {
+                num1=p1->exp;
+                num2= - p1->coeff;
+                p1 = p1 -> next;
+            }
+            else if(p1->exp<p2->exp) {
+                num1=p2->exp;
+                num2= - p2->coeff;
+                p2 = p2 -> next;
+            }
+            t->exp=num1;
+            t->coeff=num2;
+
+            t -> next = NULL;
+            if (result == NULL) {
+                result = last = t;
+            } else {
+                last -> next = t;
+                last = t;
+            }
+        }
+        if(p1!=NULL && p2==NULL) {
+            t = (struct Node * ) malloc(sizeof(struct Node));
+            num1=p1->exp;
+            num2=p1->coeff;
+            p1 = p1 -> next;
+            t->exp=num1;
+            t->coeff=num2;
+
+            t -> next = NULL;
+            if (result == NULL) {
+                result = last = t;
+            } else {
+                last -> next = t;
+                last = t;
+            }
+        }
+        if(p1==NULL && p2!=NULL) {
+            t = (struct Node * ) malloc(sizeof(struct Node));
+            num1=p2->exp;
+            num2= - p2->coeff;
+            p2 = p2 -> next;
+            t->exp=num1;
+            t->coeff=num2;
+
+            t -> next = NULL;
+            if (result == NULL) {
+                result = last = t;
+            } else {
+                last -> next = t;
+                last = t;
+            }
+        }
+    }
+    normalize(result);
+    Display(result);
+    result=NULL;
+}
+
+void mul(struct Node*p1,struct Node*p2) {
+    int i=1;
+    struct Node *t, *last=NULL;
+    while(p1) {
+        struct Node*temp=p2;
+        while(temp) {
+            t=malloc(sizeof(struct Node));
+            t->coeff=(temp->coeff) * (p1->coeff);
+            t->exp=temp->exp+p1->exp;
+            if (result == NULL) {
+                result = last = t;
+            } else {
+                last -> next = t;
+                last = t;
+            }
+            temp=temp->next;
+        }
+        p1=p1->next;
+    }
+    normalize(result);
+    Display(result);
+    result=NULL;
 }
 
 int main() {
     int x;
-    create();
-    Display(poly);
-   
-    printf("Enter value of x: ");
-    scanf("%d", &x);
-   
-    printf("%ld\n", Eval(poly, x));
+    printf("enter first polynomial:\n");
+    create1();
+    Display(poly1);
+    create2();
+    Display(poly2);
+    printf("\nADD: ");
+    add(poly1,poly2);
+    printf("\nSUB: ");
+    sub(poly1,poly2);
+    printf("\nMUL: ");
+    mul(poly1,poly2);
     return 0;
 }
